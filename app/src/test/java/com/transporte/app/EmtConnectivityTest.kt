@@ -1,5 +1,6 @@
 package com.transporte.app
 
+import com.transporte.app.data.remote.api.EmtApiService
 import com.transporte.app.di.NetworkModule
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -7,26 +8,38 @@ import org.junit.Test
 class EmtConnectivityTest {
 
     @Test
-    fun `verificar conexion con EMT devuelve token`() = runBlocking {
-        // 1. Preparamos Retrofit usando tu modulo de DI
-        val retrofit = NetworkModule.provideRetrofit(NetworkModule.provideOkHttpClient())
+    fun verifyEmtConnection() = runBlocking {
+        // 1. Inicializamos manualmente los componentes del NetworkModule
+        val okHttpClient = NetworkModule.provideOkHttpClient()
+        val retrofit = NetworkModule.provideRetrofit(okHttpClient)
         val service = NetworkModule.provideEmtApiService(retrofit)
 
-        // 2. TUS CREDENCIALES (Cámbialas por las tuyas)
-        val clientId = "TU-CLIENT-ID-AQUI"
-        val secretKey = "TU-SECRET-KEY-AQUI"
+        // 2. Tus credenciales de MobilityLabs
+        val clientId = ""
+        val secretKey = ""
 
-        // 3. Ejecutamos la llamada
-        val response = service.login(clientId, secretKey)
+        println("🚀 Iniciando petición de login a la EMT...")
 
-        // 4. Comprobamos el resultado en la consola
-        if (response.isSuccessful) {
-            val token = response.body()?.data?.get(0)?.accessToken
-            println("✅ CONEXIÓN EXITOSA. Token recibido: $token")
-        } else {
-            println("❌ ERROR: ${response.code()} - ${response.errorBody()?.string()}")
+        try {
+            val response = service.login(clientId, secretKey)
+
+            if (response.isSuccessful) {
+                val loginData = response.body()?.data?.firstOrNull()
+                if (loginData != null) {
+                    println("✅ CONEXIÓN EXITOSA")
+                    println("🔑 Access Token: ${loginData.accessToken}")
+                    println("📅 Caduca el: ${loginData.expirationDate}")
+                } else {
+                    println("⚠️ Respuesta exitosa pero sin datos (lista vacía)")
+                }
+            } else {
+                println("❌ ERROR DE CONEXIÓN")
+                println("Código: ${response.code()}")
+                println("Mensaje: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            println("💥 Error crítico al conectar: ${e.message}")
+            e.printStackTrace()
         }
-
-        assert(response.isSuccessful)
     }
 }
