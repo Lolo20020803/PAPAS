@@ -1,0 +1,6 @@
+App transporte
+    Login de usuario
+    Api con EMT Madrid
+    Mapa para ver rutas y paradas
+    Usar ia par optimizar rutas
+    Guardar rutas en local y nube
